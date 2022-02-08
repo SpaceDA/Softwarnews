@@ -1,6 +1,7 @@
 import requests
 import datetime
 
+
 # List of defense related words
 defenseWords = ['submarine', 'army', 'navy', 'air force', 'military', 'department of defense', 'weapon',
 'helicopter']
@@ -15,4 +16,5 @@ for x in defenseWords:
     f'http://hn.algolia.com/api/v1/search_by_date?tags=story&query={x}&numericFilters=created_at_i>={unix_time}')
     data = r.json()
     for y in data['hits']:
-        print(f"{y['title']} hit on: {x}")
+        print("full\n\n", y)
+        print(f"{y['title']} hit on: {x}\n\n")

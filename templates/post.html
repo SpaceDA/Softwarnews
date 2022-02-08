@@ -1,0 +1,61 @@
+<!--{% include "header.html" %}-->
+{% import "bootstrap/wtf.html" as wtf %}
+
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('{{post.img_url}}')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>{{post.title}}</h1>
+            <span class="meta">Posted by
+              <a href="#">{{ post.poster.name.title() }}</a>
+              on {{post.date}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            {{ post.body|safe }}
+          <hr>
+
+
+
+
+<!--           Comments Area -->
+          <div class="col-lg-12 col-md-10 mx-auto comment">
+{% for comment in post.comments %}
+              <ul class="commentList">
+                        <li>
+                            <div class="commentText">
+                                {{ comment.text|safe }}
+                                <span class="date sub-text">{{ comment.comment_author.name.title() }}</span>
+
+                            </div>
+                        </li>
+              </ul>
+                        {% endfor %}
+
+
+
+                      <!--             #Load ckeditor-->
+        {{ ckeditor.load() }}
+
+<!--        #Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor.-->
+        {{ ckeditor.config(name='comment') }}
+
+<!--        #Add WTF quickform-->
+        {{ wtf.quick_form(comment_form, novalidate=True, button_map={"submit": "primary"}) }}
+            <span class="date sub-text">Comment By: {{ comment.comment_author.name }}</span>
+
+    </div>
+  </article>
+
+  <hr>
