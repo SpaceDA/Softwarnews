@@ -1,4 +1,4 @@
-<!--{% include "header.html" %}-->
+{% include "header.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
   <!-- Page Header -->
@@ -53,7 +53,7 @@
 
 <!--        #Add WTF quickform-->
         {{ wtf.quick_form(comment_form, novalidate=True, button_map={"submit": "primary"}) }}
-            <span class="date sub-text">Comment By: {{ comment.comment_author.name }}</span>
+    <span class="date sub-text">Comment By: {{ current_user.name }}</span>
 
     </div>
   </article>

@@ -9,7 +9,7 @@
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="site-heading">
             <h1>Softwar News</h1>
-            <span class="subheading">Your Source For What's News in DoD Tech</span>
+            <span class="subheading">Your Source For Whats News in DoD Tech </span>
           </div>
         </div>
       </div>
@@ -32,12 +32,35 @@
             <a href="#">{{ post.poster.name }}</a>
             on {{post.date}}
 
+
+            <a href="{{url_for('upvote', post_id=post.id) }}">🔼</a>
+            {% if post.upvotes %}
+            {{post.upvotes}}
+            {% endif %}
+            <a href="{{url_for('downvote', post_id=post.id) }}">🔽</a>
+            {% if post.downvotes %}
+            {{ post.downvotes}}
+            {% endif %}
+
+            {% if post.poster.name == current_user.name %}
             <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+            {% endif %}
 
           </p>
         </div>
         <hr>
         {% endfor %}
         `</div>
+
+      {% if current_user.is_authenticated %}
+        <!-- New Post -->
+        <div class="clearfix">
+          <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

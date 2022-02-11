@@ -21,40 +21,56 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+##CONFIGURE TABLE
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
+    posts = relationship("NewsPost", back_populates="poster")
+    comments = relationship("Comment", back_populates="comment_author")
+    votes = relationship("Vote", back_populates="vote_author")
+
+
+
 class NewsPost(db.Model):
     __tablename__ = "posts"
     id = db.Column(db.Integer, primary_key=True)
-    #Create Foreign Key, "users.id" the users refers to the tablename of User.
-
     poster_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     poster = relationship("User", back_populates="posts")
     title = db.Column(db.String(250), unique=True, nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     url = db.Column(db.String(250), nullable=False)
-    comments = relationship("Comment", back_populates="news_posts")
+    comments = relationship("Comment", back_populates="parent_post")
+    votes = relationship("Vote", back_populates="parent_post")
+    upvotes = db.Column(db.Integer, default=0)
+    downvotes = db.Column(db.Integer, default=0)
 
-class User(db.Model, UserMixin):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    # This will act like a List of BlogPost objects attached to each User.
-    # The "author" refers to the author property in the BlogPost class.
-    posts = relationship("NewsPost", back_populates="poster")
-    comments = relationship("Comment", back_populates="comment_author")
 
 class Comment(db.Model):
     __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
-    comment_author = relationship("User", back_populates="comments")
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    text = db.Column(db.Text, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
-    news_posts = relationship("NewsPost", back_populates="comments")
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    parent_post = relationship("NewsPost", back_populates="comments")
+    comment_author = relationship("User", back_populates="comments")
+    text = db.Column(db.Text, nullable=False)
 
-#db.create_all()
+class Vote(db.Model):
+    __tablename__ = "votes"
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    parent_post = relationship("NewsPost", back_populates="votes")
+    vote_author = relationship("User", back_populates="votes")
+    upvote = db.Column(db.Integer, default=0)
+    downvote = db.Column(db.Integer, default=0)
+
+
+db.create_all()
+
 
 @app.context_processor
 def time_processor():
@@ -62,9 +78,11 @@ def time_processor():
         return datetime.now().strftime("%Y")
     return dict(format_time_year=format_time_year)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 @app.route('/register', methods=["GET", "POST"])
 def register_user():
@@ -87,6 +105,7 @@ def register_user():
 
     return render_template("register.html", form=new_user_form)
 
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     new_login = UserLogin()
@@ -105,10 +124,12 @@ def login():
             return redirect(url_for('get_all_posts'))
     return render_template('login.html', form=new_login)
 
+
 @app.route('/')
 def get_all_posts():
     posts = NewsPost.query.all()
     return render_template('index.html', all_posts=posts)
+
 
 @app.route('/new-post', methods=["GET", "POST"])
 def add_new_post():
@@ -119,12 +140,13 @@ def add_new_post():
             body=form.body.data,
             url=form.post_url.data,
             poster=current_user,
-            date=date.today().strftime("%B %d, %Y")
+            date=date.today().strftime("%B %d, %Y"),
         )
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for("get_all_posts"))
     return render_template('make-post.html', form=form, current_user=current_user)
+
 
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
@@ -142,22 +164,84 @@ def show_post(post_id):
 
     return render_template("post.html", post=requested_post, comment_form=comment_form, current_user=current_user)
 
+
 @app.route('/delete/<int:post_id>', methods=["GET", "POST"])
 def delete_post(post_id):
     post_to_delete = NewsPost.query.get(post_id)
 
     db.session.delete(post_to_delete)
     db.session.commit()
-    return render_template(url_for("get_all_posts"))
+    return redirect(url_for("get_all_posts"))
+
 
 @app.route("/about")
 def about():
     return render_template("about.html")
 
+
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('get_all_posts'))
+
+
+@app.route("/upvote/<int:post_id>", methods=["GET", "POST"])
+def upvote(post_id):
+    vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
+    post = NewsPost.query.get(post_id)
+    if not vote:
+        new_vote = Vote(vote_author=current_user,
+                        parent_post=post,
+                        upvote=1,
+                        downvote=0)
+        db.session.add(new_vote)
+        post.upvotes += 1
+
+    elif vote.upvote == 1:
+        vote.upvote = 0
+        post.upvotes -= 1
+
+    elif vote.upvote == 0:
+        vote.upvote = 1
+        vote.downvote = 0
+        post.upvotes += 1
+        if post.downvotes > 0:
+            post.downvotes -= 1
+
+    db.session.commit()
+
+    return redirect(url_for("get_all_posts"))
+
+
+@app.route("/downvote/<int:post_id>", methods=["GET", "POST"])
+def downvote(post_id):
+    vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
+    post = NewsPost.query.get(post_id)
+
+    if not vote:
+        new_vote = Vote(vote_author=current_user,
+                        parent_post=post,
+                        upvote=0,
+                        downvote=1)
+        db.session.add(new_vote)
+        post.downvotes += 1
+
+    elif vote.downvote == 1:
+        vote.downvote = 0
+        post.downvotes -= 1
+
+    elif vote.downvote == 0:
+        vote.downvote = 1
+        vote.upvote = 0
+        post.downvotes += 1
+        if post.upvotes > 0:
+            post.upvotes -=1
+
+
+
+    db.session.commit()
+    return redirect(url_for("get_all_posts"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
