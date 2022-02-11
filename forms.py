@@ -18,12 +18,12 @@ class UserComment(FlaskForm):
     submit = SubmitField("Submit Comment")
 
 class NewUserForm(FlaskForm):
-    user_name = StringField("User Name", validators=[DataRequired()])
-    user_email = StringField("User Email", validators=[DataRequired(), email()])
+    user_name = StringField("Create Username", validators=[DataRequired()])
+    user_email = StringField("Email Address", validators=[DataRequired(), email()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Register")
 
 class UserLogin(FlaskForm):
-    user_email = StringField("User Name", validators=[DataRequired()])
+    user_email = StringField("Email Address", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
