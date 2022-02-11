@@ -1,13 +1,13 @@
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+from sqlalchemy import exc
 from flask_login import UserMixin, LoginManager, current_user, login_user, logout_user
 from flask_ckeditor import CKEditor
 from forms import CreatePostForm, UserComment, NewUserForm, UserLogin
 from datetime import date
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'softwar'
@@ -21,6 +21,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 ##CONFIGURE TABLE
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -30,8 +31,8 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     posts = relationship("NewsPost", back_populates="poster")
     comments = relationship("Comment", back_populates="comment_author")
-    votes = relationship("Vote", back_populates="vote_author")
-
+    post_votes = relationship("PostVote", back_populates="vote_author")
+    comment_votes = relationship("CommentVote", back_populates="vote_author")
 
 
 class NewsPost(db.Model):
@@ -42,9 +43,9 @@ class NewsPost(db.Model):
     title = db.Column(db.String(250), unique=True, nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    url = db.Column(db.String(250), nullable=False)
+    url = db.Column(db.String(250), nullable=False, unique=True)
     comments = relationship("Comment", back_populates="parent_post")
-    votes = relationship("Vote", back_populates="parent_post")
+    post_votes = relationship("PostVote", back_populates="parent_post")
     upvotes = db.Column(db.Integer, default=0)
     downvotes = db.Column(db.Integer, default=0)
 
@@ -57,14 +58,29 @@ class Comment(db.Model):
     parent_post = relationship("NewsPost", back_populates="comments")
     comment_author = relationship("User", back_populates="comments")
     text = db.Column(db.Text, nullable=False)
+    comment_votes = relationship("CommentVote", back_populates="parent_comment")
+    upvotes = db.Column(db.Integer, default=0)
+    downvotes = db.Column(db.Integer, default=0)
 
-class Vote(db.Model):
-    __tablename__ = "votes"
+
+class PostVote(db.Model):
+    __tablename__ = "post-votes"
     id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    parent_post = relationship("NewsPost", back_populates="votes")
-    vote_author = relationship("User", back_populates="votes")
+    parent_post = relationship("NewsPost", back_populates="post_votes")
+    vote_author = relationship("User", back_populates="post_votes")
+    upvote = db.Column(db.Integer, default=0)
+    downvote = db.Column(db.Integer, default=0)
+
+
+class CommentVote(db.Model):
+    __tablename__ = "comment-votes"
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id"))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    parent_comment = relationship("Comment", back_populates="comment_votes")
+    vote_author = relationship("User", back_populates="comment_votes")
     upvote = db.Column(db.Integer, default=0)
     downvote = db.Column(db.Integer, default=0)
 
@@ -76,6 +92,7 @@ db.create_all()
 def time_processor():
     def format_time_year():
         return datetime.now().strftime("%Y")
+
     return dict(format_time_year=format_time_year)
 
 
@@ -92,14 +109,14 @@ def register_user():
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('login'))
         new_user = User(
-            name = new_user_form.user_name.data,
-            email = new_user_form.user_email.data,
-            password =generate_password_hash(new_user_form.password.data,
-                                             method='pbkdf2:sha256', salt_length=8)
+            name=new_user_form.user_name.data,
+            email=new_user_form.user_email.data,
+            password=generate_password_hash(new_user_form.password.data,
+                                            method='pbkdf2:sha256', salt_length=8)
         )
         db.session.add(new_user)
         db.session.commit()
-        #login & auth user
+        # login & auth user
         login_user(new_user)
         return redirect(url_for('get_all_posts'))
 
@@ -135,6 +152,7 @@ def get_all_posts():
 @app.route('/new-post', methods=["GET", "POST"])
 def add_new_post():
     form = CreatePostForm()
+
     if form.validate_on_submit():
         new_post = NewsPost(
             title=form.title.data,
@@ -146,6 +164,7 @@ def add_new_post():
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for("get_all_posts"))
+
     return render_template('make-post.html', form=form, current_user=current_user)
 
 
@@ -169,7 +188,7 @@ def show_post(post_id):
 @app.route('/delete/<int:post_id>', methods=["GET", "POST"])
 def delete_post(post_id):
     post_to_delete = NewsPost.query.get(post_id)
-    db.session.query(Vote).filter_by(post_id=post_id).delete()
+    db.session.query(PostVote).filter_by(post_id=post_id).delete()
     db.session.delete(post_to_delete)
 
     db.session.commit()
@@ -187,18 +206,18 @@ def logout():
     return redirect(url_for('get_all_posts'))
 
 
-@app.route("/upvote/<int:post_id>", methods=["GET", "POST"])
+@app.route("/post-upvote/<int:post_id>", methods=["GET", "POST"])
 def upvote(post_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register.")
         return redirect(url_for("login"))
-    vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
+    vote = PostVote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
     if not vote:
-        new_vote = Vote(vote_author=current_user,
-                        parent_post=post,
-                        upvote=1,
-                        downvote=0)
+        new_vote = PostVote(vote_author=current_user,
+                            parent_post=post,
+                            upvote=1,
+                            downvote=0)
         db.session.add(new_vote)
         post.upvotes += 1
 
@@ -218,19 +237,19 @@ def upvote(post_id):
     return redirect(url_for("get_all_posts"))
 
 
-@app.route("/downvote/<int:post_id>", methods=["GET", "POST"])
+@app.route("/post-downvote/<int:post_id>", methods=["GET", "POST"])
 def downvote(post_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register")
         return redirect(url_for("login"))
-    vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
+    vote = PostVote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
 
     if not vote:
-        new_vote = Vote(vote_author=current_user,
-                        parent_post=post,
-                        upvote=0,
-                        downvote=1)
+        new_vote = PostVote(vote_author=current_user,
+                            parent_post=post,
+                            upvote=0,
+                            downvote=1)
         db.session.add(new_vote)
         post.downvotes += 1
 
@@ -243,15 +262,74 @@ def downvote(post_id):
         vote.upvote = 0
         post.downvotes += 1
         if post.upvotes > 0:
-            post.upvotes -=1
-
-
+            post.upvotes -= 1
 
     db.session.commit()
     return redirect(url_for("get_all_posts"))
 
 
+@app.route("/comment-upvote/<int:comment_id>", methods=["GET", "POST"])
+def comment_upvote(comment_id):
+    if not current_user.is_authenticated:
+        flash("Only registered users can vote. Please login or register.")
+        return redirect(url_for("login"))
+    vote = CommentVote.query.filter_by(comment_id=comment_id, author_id=current_user.id).first()
+    comment = Comment.query.get(comment_id)
+    if not vote:
+        new_vote = CommentVote(vote_author=current_user,
+                               parent_comment=comment,
+                               upvote=1,
+                               downvote=0)
+        db.session.add(new_vote)
+        comment.upvotes += 1
+
+    elif vote.upvote == 1:
+        vote.upvote = 0
+        comment.upvotes -= 1
+
+    elif vote.upvote == 0:
+        vote.upvote = 1
+        vote.downvote = 0
+        comment.upvotes += 1
+        if comment.downvotes > 0:
+            comment.downvotes -= 1
+
+    db.session.commit()
+
+    return redirect(url_for("show_post", post_id=comment.post_id))
+
+
+@app.route("/comment-downvote/<int:comment_id>", methods=["GET", "POST"])
+def comment_downvote(comment_id):
+    if not current_user.is_authenticated:
+        flash("Only registered users can vote. Please login or register")
+        return redirect(url_for("login"))
+    vote = CommentVote.query.filter_by(comment_id=comment_id, author_id=current_user.id).first()
+    comment = Comment.query.get(comment_id)
+
+    if not vote:
+        new_vote = CommentVote(vote_author=current_user,
+                               parent_comment=comment,
+                               upvote=0,
+                               downvote=1)
+        db.session.add(new_vote)
+        comment.downvotes += 1
+
+    elif vote.downvote == 1:
+        vote.downvote = 0
+        comment.downvotes -= 1
+
+    elif vote.downvote == 0:
+        vote.downvote = 1
+        vote.upvote = 0
+        comment.downvotes += 1
+        if comment.upvotes > 0:
+            comment.upvotes -= 1
+
+    db.session.commit()
+
+    return redirect(url_for("show_post", post_id=comment.post_id))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-

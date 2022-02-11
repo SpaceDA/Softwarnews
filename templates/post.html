@@ -36,6 +36,14 @@
                         <li>
                             <div class="commentText">
                                 {{ comment.text|safe }}
+                                <a href="{{ url_for('comment_upvote', comment_id=comment.id) }}">🔼</a>
+                                {% if comment.upvotes %}
+                                {{comment.upvotes}}
+                                {% endif %}
+                                <a href="{{ url_for('comment_downvote', comment_id=comment.id) }}">🔽</a>
+                                {% if comment.downvotes %}
+                                {{ comment.downvotes}}
+                                {% endif %}
                                 <span class="date sub-text">{{ comment.comment_author.name.title() }}</span>
 
                             </div>
