@@ -127,7 +127,8 @@ def login():
 
 @app.route('/')
 def get_all_posts():
-    posts = NewsPost.query.all()
+    posts = NewsPost.query.order_by(NewsPost.upvotes.desc()).all()
+
     return render_template('index.html', all_posts=posts)
 
 
