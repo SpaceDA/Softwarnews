@@ -168,8 +168,9 @@ def show_post(post_id):
 @app.route('/delete/<int:post_id>', methods=["GET", "POST"])
 def delete_post(post_id):
     post_to_delete = NewsPost.query.get(post_id)
-
+    db.session.query(Vote).filter_by(post_id=post_id).delete()
     db.session.delete(post_to_delete)
+
     db.session.commit()
     return redirect(url_for("get_all_posts"))
 
@@ -187,6 +188,9 @@ def logout():
 
 @app.route("/upvote/<int:post_id>", methods=["GET", "POST"])
 def upvote(post_id):
+    if not current_user.is_authenticated:
+        flash("Only registered users can vote. Please login or register.")
+        return redirect(url_for("login"))
     vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
     if not vote:
@@ -215,6 +219,9 @@ def upvote(post_id):
 
 @app.route("/downvote/<int:post_id>", methods=["GET", "POST"])
 def downvote(post_id):
+    if not current_user.is_authenticated:
+        flash("Only registered users can vote. Please login or register")
+        return redirect(url_for("login"))
     vote = Vote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
 
