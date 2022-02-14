@@ -5,7 +5,7 @@ from sqlalchemy import exc
 from flask_login import UserMixin, LoginManager, current_user, login_user, logout_user
 from flask_ckeditor import CKEditor
 from forms import CreatePostForm, UserComment, NewUserForm, UserLogin
-from datetime import date
+from datetime import date, datetime
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
