@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
@@ -10,8 +12,8 @@ from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'softwar'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///softwareNews.db'
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///softwareNews.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 ckeditor = CKEditor(app)
 Bootstrap(app)
