@@ -23,7 +23,7 @@
 
         {% for post in all_posts %}
         <div class="post-preview">
-          <a href="{{ url_for('show_post', post_id=post.id) }}">
+          <a href="{{ url_for('main_bp.show_post', post_id=post.id) }}">
             <h2 class="post-title">
               {{post.title}}
             </h2>
@@ -33,17 +33,17 @@
             on {{post.date}}
 
 
-            <a href="{{url_for('upvote', post_id=post.id) }}">🔼</a>
+            <a href="{{url_for('main_bp.upvote', post_id=post.id) }}">🔼</a>
             {% if post.upvotes %}
             {{post.upvotes}}
             {% endif %}
-            <a href="{{url_for('downvote', post_id=post.id) }}">🔽</a>
+            <a href="{{url_for('main_bp.downvote', post_id=post.id) }}">🔽</a>
             {% if post.downvotes %}
             {{ post.downvotes}}
             {% endif %}
 
             {% if post.poster.name == current_user.name %}
-            <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+            <a href="{{url_for('main_bp.delete_post', post_id=post.id) }}">✘</a>
             {% endif %}
 
           </p>
@@ -55,7 +55,7 @@
       {% if current_user.is_authenticated %}
         <!-- New Post -->
         <div class="clearfix">
-          <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+          <a class="btn btn-primary float-right" href="{{url_for('main_bp.add_new_post')}}">Create New Post</a>
         </div>
         {% endif %}
       </div>

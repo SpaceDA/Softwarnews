@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required, logout_user
-from models import NewsPost, Comment, PostVote
+from .models import NewsPost, Comment, PostVote
 from application.forms import CreatePostForm, UserComment
 from datetime import date, datetime
 from . import db
@@ -28,7 +28,7 @@ def logout():
     return redirect(url_for('auth_bp.login'))
 
 
-@main_bp.context_processor
+@main_bp.app_context_processor
 def time_processor():
     def format_time_year():
         return datetime.now().strftime("%Y")

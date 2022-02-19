@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
-from config import Config
 
 
 # Globally accessible libraries
@@ -30,7 +29,8 @@ def init_app():
 
         # Register Blueprints
         app.register_blueprint(auth.auth_bp)
-        app.register_blueprint(admin.admin_bp)
+        app.register_blueprint(routes.main_bp)
+
 
         # create database model
         db.create_all()
