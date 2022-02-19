@@ -17,7 +17,7 @@
         {% endif %}
         {% endwith %}
         {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-          <a class="btn btn-primary float-right" style="margin-top: 20px" href="{{url_for('register_user')}}">Register</a>
+          <a class="btn btn-primary float-right" style="margin-top: 20px" href="{{url_for('auth_bp.register_user')}}">Register</a>
       </div>
     </div>
 
