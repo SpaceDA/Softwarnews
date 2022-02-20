@@ -21,13 +21,13 @@ def login():
         user = User.query.filter_by(email=email).first()
         if not user:
             flash("User Not Validated. Please Try Again")
-            return redirect(url_for("login"))
+            return redirect(url_for("auth_bp.login"))
         elif not check_password_hash(user.password, password):
             flash("Incorrect password. Please Try Again")
-            return redirect(url_for("login"))
+            return redirect(url_for("auth_bp.login"))
         else:
             login_user(user)
-            return redirect(url_for('get_all_posts'))
+            return redirect(url_for('main_bp.get_all_posts'))
     return render_template('login.html', form=new_login)
 
 
@@ -43,7 +43,7 @@ def register_user():
     if new_user_form.validate_on_submit():
         if User.query.filter_by(email=new_user_form.user_email.data).first():
             flash("You've already signed up with that email, log in instead!")
-            return redirect(url_for('login'))
+            return redirect(url_for('auth_bp.login'))
         new_user = User(
             name=new_user_form.user_name.data,
             email=new_user_form.user_email.data,
@@ -54,7 +54,7 @@ def register_user():
         db.session.commit()
         # login & auth user
         login_user(new_user)
-        return redirect(url_for('get_all_posts'))
+        return redirect(url_for('main_bp.get_all_posts'))
 
     return render_template("register.html", form=new_user_form)
 

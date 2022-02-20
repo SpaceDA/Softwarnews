@@ -51,7 +51,7 @@ def add_new_post():
         )
         db.session.add(new_post)
         db.session.commit()
-        return redirect(url_for("get_all_posts"))
+        return redirect(url_for("main_bp.get_all_posts"))
 
     return render_template('make-post.html', form=form, current_user=current_user)
 
@@ -68,7 +68,7 @@ def show_post(post_id):
             return render_template("post.html", post=requested_post, comment_form=comment_form)
         else:
             flash("Only users who are logged in can comment, please log in")
-            return redirect(url_for('login'))
+            return redirect(url_for('auth_bp.login'))
 
     return render_template("post.html", post=requested_post, comment_form=comment_form, current_user=current_user)
 
@@ -81,7 +81,7 @@ def delete_post(post_id):
     db.session.delete(post_to_delete)
 
     db.session.commit()
-    return redirect(url_for("get_all_posts"))
+    return redirect(url_for("main_bp.get_all_posts"))
 
 
 @main_bp.route("/about")
@@ -93,7 +93,7 @@ def about():
 def upvote(post_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register.")
-        return redirect(url_for("login"))
+        return redirect(url_for("auth_bp.login"))
     vote = PostVote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
     if not vote:
@@ -117,14 +117,14 @@ def upvote(post_id):
 
     db.session.commit()
 
-    return redirect(url_for("get_all_posts"))
+    return redirect(url_for("main_bp.get_all_posts"))
 
 
 @main_bp.route("/post-downvote/<int:post_id>", methods=["GET", "POST"])
 def downvote(post_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register")
-        return redirect(url_for("login"))
+        return redirect(url_for("auth_bp.login"))
     vote = PostVote.query.filter_by(post_id=post_id, author_id=current_user.id).first()
     post = NewsPost.query.get(post_id)
 
@@ -148,14 +148,14 @@ def downvote(post_id):
             post.upvotes -= 1
 
     db.session.commit()
-    return redirect(url_for("get_all_posts"))
+    return redirect(url_for("main_bp.get_all_posts"))
 
 
 @main_bp.route("/comment-upvote/<int:comment_id>", methods=["GET", "POST"])
 def comment_upvote(comment_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register.")
-        return redirect(url_for("login"))
+        return redirect(url_for("auth_bp.login"))
     vote = CommentVote.query.filter_by(comment_id=comment_id, author_id=current_user.id).first()
     comment = Comment.query.get(comment_id)
     if not vote:
@@ -179,14 +179,14 @@ def comment_upvote(comment_id):
 
     db.session.commit()
 
-    return redirect(url_for("show_post", post_id=comment.post_id))
+    return redirect(url_for("main_bp.show_post", post_id=comment.post_id))
 
 
 @main_bp.route("/comment-downvote/<int:comment_id>", methods=["GET", "POST"])
 def comment_downvote(comment_id):
     if not current_user.is_authenticated:
         flash("Only registered users can vote. Please login or register")
-        return redirect(url_for("login"))
+        return redirect(url_for("auth_bp.login"))
     vote = CommentVote.query.filter_by(comment_id=comment_id, author_id=current_user.id).first()
     comment = Comment.query.get(comment_id)
 
@@ -211,5 +211,5 @@ def comment_downvote(comment_id):
 
     db.session.commit()
 
-    return redirect(url_for("show_post", post_id=comment.post_id))
+    return redirect(url_for("main_bp.show_post", post_id=comment.post_id))
 
