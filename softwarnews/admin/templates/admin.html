@@ -8,7 +8,7 @@
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="site-heading">
-            <h1>ADmin</h1>
+            <h1>Admin</h1>
           </div>
         </div>
       </div>
@@ -17,41 +17,7 @@
 
   <!-- Main Content -->
   <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-
-        {% for article in articles %}
-        <div class="post-preview">
-          <a href="{{ article['url }}">
-            <h2 class="post-title">
-              {{ article['title'] }}
-            </h2>
-          </a>
-          <p class="post-meta">Posted by
-            <a href="#">{{ article['author'] }}</a>
-            on {{ article['created_at'] }}
-
-
-<!--            <a href="{{url_for('main_bp.upvote', post_id=post.id) }}">🔼</a>-->
-<!--            {% if post.upvotes %}-->
-<!--            {{post.upvotes}}-->
-<!--            {% endif %}-->
-<!--            <a href="{{url_for('main_bp.downvote', post_id=post.id) }}">🔽</a>-->
-<!--            {% if post.downvotes %}-->
-<!--            {{ post.downvotes}}-->
-<!--            {% endif %}-->
-
-<!--            {% if post.poster.name == current_user.name %}-->
-<!--            <a href="{{url_for('main_bp.delete_post', post_id=post.id) }}">✘</a>-->
-<!--            {% endif %}-->
-
-          </p>
-        </div>
-        <hr>
-        {% endfor %}
-        `</div>
-      </div>
-    </div>
+   {{articles}}
   </div>
 
 </body>
