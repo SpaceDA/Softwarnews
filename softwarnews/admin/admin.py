@@ -15,4 +15,4 @@ def admin():
     search = AdminArticleSearch()
     if search.validate_on_submit():
         articles = fetch_articles(search.keyword)
-    return render_template('admin.html', articles=articles)
+    return render_template('admin.html', articles=articles, search=search)
