@@ -6,9 +6,10 @@ admin_bp = Blueprint(
     "admin_bp", __name__, template_folder="templates", static_folder="static"
 )
 
+
 @admin_bp.route('/admin', methods=['GET'])
 def admin():
-    if not current_user.id == 1:
+    if current_user.id != 1:
         return redirect(url_for('main_bp.get_all_posts'))
     articles = fetch_articles()
     return render_template('admin.html', articles=articles)
