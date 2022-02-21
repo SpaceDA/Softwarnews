@@ -12,7 +12,6 @@ admin_bp = Blueprint(
 def admin():
     if current_user.id != 1:
         return redirect(url_for('main_bp.get_all_posts'))
-    search = AdminArticleSearch()
-    if search.validate_on_submit():
-        articles = fetch_articles(search.keyword)
-    return render_template('admin.html', articles=articles, search=search)
+    search_form = AdminArticleSearch()
+
+    return render_template('admin.html', search_form=search_form)

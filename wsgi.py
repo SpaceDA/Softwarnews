@@ -1,4 +1,4 @@
-from softwarnews.application import init_app
+from application import init_app
 
 
 app = init_app()
