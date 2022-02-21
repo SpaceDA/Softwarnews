@@ -26,10 +26,12 @@ def init_app():
         # Include our Routes
         from . import routes
         from . import auth
+        from softwarnews.admin import admin
 
         # Register Blueprints
         app.register_blueprint(auth.auth_bp)
         app.register_blueprint(routes.main_bp)
+        app.register_blueprint(admin.admin_bp)
 
 
         # create database model
