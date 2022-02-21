@@ -11,19 +11,19 @@ class Config:
     SECRET_KEY = environ.get("SECRET_KEY")
     STATIC_FOLDER = 'static'
     TEMPLATES_FOLDER = 'templates'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProdConfig(Config):
+    """Production Config - Change on __init__.py"""
     FLASK_ENV = 'production'
     DEBUG = False
     TESTING = False
     DATABASE_URI = environ.get('DATABASE_URL')
 
 class DevConfig(Config):
+    """Development Config - Change on __init__.py"""
     FLASK_ENV = 'development'
     TESTING = True
     DEBUG = True
     DATABASE_URI = environ.get('DEV_DATABASE_URI')
 
-    # Database
-    SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "sqlite:///softwareNews.db")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
