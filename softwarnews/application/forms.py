@@ -11,9 +11,11 @@ class CreatePostForm(FlaskForm):
     body = CKEditorField("Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
 
+
 class UserComment(FlaskForm):
     comment = CKEditorField('Comment', validators=[DataRequired()])
     submit = SubmitField("Submit Comment")
+
 
 class NewUserForm(FlaskForm):
     user_name = StringField("Create Username", validators=[DataRequired()])
@@ -21,7 +23,13 @@ class NewUserForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Register")
 
+
 class UserLogin(FlaskForm):
     user_email = StringField("Email Address", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
+
+
+class AdminArticleSearch(FlaskForm):
+    keyword = StringField("keyword", validators=[DataRequired()])
+    submit = SubmitField("Submit")
