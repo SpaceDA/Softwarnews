@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required, logout_user
 from .models import NewsPost, Comment, PostVote
-from application.forms import CreatePostForm, UserComment
+from softwarnews.forms import CreatePostForm, UserComment
 from datetime import date, datetime
-from . import db
+from softwarnews import db
+
 
 
 # Blueprint Configuration

@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user
-from softwarnews.api import fetch_articles
-from softwarnews.application.forms import AdminArticleSearch
+from softwarnews.forms import AdminArticleSearch
 
 admin_bp = Blueprint(
     "admin_bp", __name__, template_folder="templates", static_folder="static"

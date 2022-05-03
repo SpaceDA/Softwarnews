@@ -1,4 +1,4 @@
-from . import db
+from softwarnews import db
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship
 
