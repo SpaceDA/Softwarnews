@@ -34,7 +34,7 @@ Flask-Bootstrap
 Flask-CKEditor
 Flask-Compress
 Flask-Gravatar
-Flask-Login=
+Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
 fonttools
@@ -83,7 +83,7 @@ prompt-toolkit
 psutil
 psycopg2-binary
 ptyprocess
-pure-eval=
+pure-eval
 pycparser
 Pygments
 PyJWT
