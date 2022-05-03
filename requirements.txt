@@ -121,6 +121,6 @@ wcwidth==0.2.5
 webassets==2.0
 webencodings==0.5.1
 websocket-client==1.3.1
-Werkzeug==1.0.1
+Werkzeug==2.0
 widgetsnbextension==3.6.0
 WTForms==2.3.3
