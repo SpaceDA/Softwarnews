@@ -1,7 +1,5 @@
 from os import environ, path
 from dotenv import load_dotenv
-import psycopg2
-
 
 
 basedir = path.abspath(path.dirname(__file__))
