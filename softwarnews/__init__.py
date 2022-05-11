@@ -18,12 +18,6 @@ def init_app():
 
     app.config.from_object('config.ProdConfig')
     db.init_app(app)
-    ckeditor.init_app(app)
-    bootstrap.init_app(app)
-    login_manager.init_app(app)
-
-
-
     login_manager.init_app(app)
     ckeditor.init_app(app)
     bootstrap.init_app(app)
