@@ -2,6 +2,7 @@ from softwarnews import db
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship
 
+
 class User(UserMixin, db.Model):
     """ USER TABLE """
     __tablename__ = "users"

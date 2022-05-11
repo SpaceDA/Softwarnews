@@ -11,6 +11,7 @@ ckeditor = CKEditor()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 
+
 def init_app():
     """Initialize the core application."""
     app = Flask(__name__, instance_relative_config=False)
