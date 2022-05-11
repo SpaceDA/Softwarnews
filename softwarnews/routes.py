@@ -18,6 +18,7 @@ main_bp = Blueprint(
 @main_bp.route('/', methods=['GET'])
 def get_all_posts():
     posts = NewsPost.query.order_by(NewsPost.upvotes.desc()).all()
+
     return render_template('index.html', all_posts=posts)
 
 
