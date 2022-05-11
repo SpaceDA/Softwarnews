@@ -18,7 +18,8 @@ class ProdConfig(Config):
     FLASK_ENV = 'production'
     DEBUG = False
     TESTING = False
-    DATABASE_URL = environ.get('SQLALCHEMY_DATABASE_URI')
+    SECRET_KEY = environ.get('SECRET_KEY')
+    DATABASE_URL = environ.get('DATABASE_URL')
 
 
 class DevConfig(Config):
