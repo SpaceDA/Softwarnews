@@ -17,7 +17,7 @@ class ProdConfig(Config):
     DEBUG = False
     TESTING = False
     SECRET_KEY = environ.get('SECRET_KEY')
-    DATABASE_URL = environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL')
 
 
 class DevConfig(Config):
