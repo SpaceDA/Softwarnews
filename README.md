@@ -1,6 +1,10 @@
 ## Purpose
 To serve as a one-stop-shop for the DoD software community to share articles and commentary.
 
+Registered users can view, post links, comment on posts, and vote on articles and posts. 
+
+Un-registered users can only view content and comments. 
+
 ## Quickstart
 -No registration/login is required to view articles and posts.
 -To submit an article/post, register under the register tab. 
